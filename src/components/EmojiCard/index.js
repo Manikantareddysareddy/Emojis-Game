@@ -8,17 +8,15 @@ const EmojiCard = props => {
     onEmojiClick(id)
   }
   return (
-    <li className="list-container">
-      <div className="emoji-container">
-        <img
-          src={emojiUrl}
-          alt={emojiName}
-          className="emoji-image"
-          onClick={onImageClick}
-        />
-      </div>
-    </li>
+    <div className="emoji-container">
+      <li className="list-container">
+        <button type="button" onClick={onImageClick} className="img-button">
+          <img src={emojiUrl} alt={emojiName} className="emoji-image" />
+        </button>
+      </li>
+    </div>
   )
 }
 
 export default EmojiCard
+
