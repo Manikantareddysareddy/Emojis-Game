@@ -1,14 +1,22 @@
+
 /* 
 Quick Tip 
 
 - Use the below function in the EmojiGame Component to shuffle the emojisList every time when an emoji is clicked.
-*/
 
+const shuffledEmojisList = () => {
+  const {emojisList} = this.props
+  return emojisList.sort(() => Math.random() - 0.5)
+}
+
+*/
 import {Component} from 'react'
 
-import NavBar from '../NavBar'
+import {NavBar, NavBar1} from '../NavBar'
 
 import EmojiCard from '../EmojiCard'
+
+import {WinCard, LoseCard} from '../WinOrLoseCard'
 
 import './index.css'
 
@@ -85,10 +93,16 @@ const emojisList = [
 ]
 
 class EmojiGame extends Component {
-  state = {NewEmojisList: [], EmojisList: emojisList, Score: 0, TopScore: 0}
+  state = {
+    NewEmojisList: [],
+    EmojisList: emojisList,
+    isActive: 'neutral',
+    Score: 0,
+    TopScore: 0,
+  }
 
   onEmojiClick = id => {
-    const {NewEmojisList} = this.state
+    const {NewEmojisList, TopScore, Score} = this.state
     const shuffledEmojisList = () => {
       const {EmojisList} = this.state
       return EmojisList.sort(() => Math.random() - 0.5)
@@ -98,33 +112,71 @@ class EmojiGame extends Component {
 
     this.setState(prevState => ({
       NewEmojisList: [...prevState.NewEmojisList, filterData[0]],
-      Score: prevState.Score + 1,
-      TopScore: prevState.TopScore + 1,
     }))
+
     const boolVal = NewEmojisList.map(eachItem => eachItem.id === id)
+    if (boolVal.includes(false)) {
+      this.setState({Score: Score + 1})
+    }
     if (boolVal.includes(true)) {
-      console.log('YOU LOST THE GAME')
+      let newTopScore
+      if (Score > TopScore) {
+        newTopScore = Score
+      } else {
+        newTopScore = TopScore
+      }
+      this.setState({
+        isActive: 'Loss',
+        TopScore: newTopScore,
+        NewEmojisList: [],
+      })
+    }
+    if (boolVal.length === 11) {
+      const newTopScore = Score + 1
+      this.setState({
+        isActive: 'Win',
+        TopScore: newTopScore + 1,
+        NewEmojisList: [],
+      })
     }
   }
 
+  newGameStart = () => {
+    const {Score, TopScore} = this.state
+    console.log(TopScore, Score)
+    if (TopScore < Score) {
+      this.setState({TopScore: Score})
+    }
+    this.setState({isActive: 'neutral', Score: 0})
+  }
+
   render() {
-    const {Score, TopScore, EmojisList} = this.state
-    return (
-      <div className="top-bg-container">
-        <NavBar Score={Score} TopScore={TopScore} />
-        <div className="bg-container">
-          <ul className="ul-container">
-            {EmojisList.map(eachEmoji => (
-              <EmojiCard
-                emojiCard={eachEmoji}
-                key={eachEmoji.id}
-                onEmojiClick={this.onEmojiClick}
-              />
-            ))}
-          </ul>
+    let WinOrLose
+    const {Score, TopScore, EmojisList, isActive} = this.state
+    let Game
+    if (isActive === 'neutral') {
+      Game = (
+        <div className="top-bg-container">
+          <NavBar Score={Score} TopScore={TopScore} />
+          <div className="bg-container">
+            <ul className="ul-container">
+              {EmojisList.map(eachEmoji => (
+                <EmojiCard
+                  emojiCard={eachEmoji}
+                  key={eachEmoji.id}
+                  onEmojiClick={this.onEmojiClick}
+                />
+              ))}
+            </ul>
+          </div>
         </div>
-      </div>
-    )
+      )
+    } else if (isActive === 'Win') {
+      Game = <WinCard Score={Score} newGameStart={this.newGameStart} />
+    } else {
+      Game = <LoseCard Score={Score} newGameStart={this.newGameStart} />
+    }
+    return <div>{Game}</div>
   }
 }
 export default EmojiGame
